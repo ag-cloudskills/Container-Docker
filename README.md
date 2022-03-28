@@ -78,3 +78,49 @@ docker inspect <conatiner>
 
 # docker container logs
  docker logs <conatinerid>
+```
+## Docker image creation
+```bash
+# manual installation
+apt-get update
+apt-get install -y python
+apt-get install -y python3-pip
+pip install flask
+FLASK_APP=app.py flask run --host=0.0.0.0
+# Verify the above manual steps before creating docker file
+```
+# Docker File creation
+```docker
+FROM ubuntu
+
+RUN apt-get update
+RUN apt-get install -y python python3-pip
+RUN pip install flask
+
+COPY  app.py /opt/app.py
+
+ENTRYPOINT FLASK_APP=app.py flask run --host=0.0.0.0
+```
+```docker
+$ cat Dockerfile 
+FROM python:3.6
+
+RUN pip install flask
+
+COPY . /opt/
+
+EXPOSE 8080
+
+WORKDIR /opt
+
+ENTRYPOINT ["python", "app.py"]
+```
+*Docker file creation and build*
+```bash
+cat > Dockerfile
+docker build -t ashishaggupta/my-custom-app .
+docker login
+docker push ashishaggupta/my-custom-app
+# pass environment varaible in docker command
+
+docker run -p 38282:8080 --name blue-app -e APP_COLOR=blue -d kodekloud/simple-webapp
