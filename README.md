@@ -124,3 +124,5 @@ docker push ashishaggupta/my-custom-app
 # pass environment varaible in docker command
 
 docker run -p 38282:8080 --name blue-app -e APP_COLOR=blue -d kodekloud/simple-webapp
+
+# Docker inspect
