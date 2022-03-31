@@ -124,5 +124,64 @@ docker push ashishaggupta/my-custom-app
 # pass environment varaible in docker command
 
 docker run -p 38282:8080 --name blue-app -e APP_COLOR=blue -d kodekloud/simple-webapp
+```
+### Sample Voting application build
+```bash
+git clone https://github.com/dockersamples/example-voting-app
+cd vote
+docker build . -t voting-app
+docker images
+docker run-d -p 5000:80 --link redis:redis voting-app
+#Unit test to vallidate url is working
 
-# Docker inspect
+#run redis container
+docker run -d --name redis redis
+
+#link redis container 
+docker run -p 5000:80 --link redis:redis  voting-app
+#unit test to check in-memory db is functional
+
+ docker run --name db -e POSTGRES_PASSWORD=postgres -d postgres:9.4
+
+#build worker image
+cd worker
+docker build . -t worker-app
+docker run -d --name worker
+docker run -d --link redis:redis --link db:db --name worker worker-app
+
+#build result app
+
+cd result
+docker build . -t result-app 
+docker run -d -p 5001:80 --link db:db result-app
+
+#install docker compose
+curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+vi docker-compose.yml
+docker-compose up
+```
+```docker
+# Create volume on Docker
+docker volume create data_volume
+# volume is created under /var/lib/docker
+docker run -v data_volume:/var/lib/mysql mysql
+# bind mount ( external storage)
+docker run -v /data/mysql:/var/lib/mysql mysql
+docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+# networking
+docker network ls
+docker network inspect bridge
+docker network create --driver bridge --subnet 182.18.0.1/24 --gateway 182.18.0.1 wp-mysql-network
+docker run -d --network wp-mysql-network --name mysql-db  -e MYSQL_ROOT_PASSWORD=db_pass123 mysql:5.6
+
+# docker registry
+
+docker run -d -p 5000:5000 --restart=always --name my-registry registry:2
+# tag the image
+docker image tag nginx:latest localhost:5000/nginx:latest
+docker push localhost:5000/nginx:latest
+
+# remove all containers
+docker image prune -a
